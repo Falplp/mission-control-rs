@@ -19,14 +19,13 @@ pub fn send(config: &NotificationConfig, message: &str) -> Vec<String> {
         Err(error) => return vec![error.to_string()],
     };
     let mut errors = Vec::new();
-    if let Some(url) = configured_value(&config.webhook_url_env) {
-        if let Err(error) = client
+    if let Some(url) = configured_value(&config.webhook_url_env)
+        && let Err(error) = client
             .post(url)
             .json(&json!({"event":"approval_required", "message":message}))
             .send()
-        {
-            errors.push(format!("webhook: {error}"));
-        }
+    {
+        errors.push(format!("webhook: {error}"));
     }
     if let (Some(token), Some(chat_id)) = (
         configured_value(&config.telegram_token_env),

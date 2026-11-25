@@ -241,14 +241,13 @@ impl Config {
         if let Some(workspace) = workspace {
             self.security.workspace_root = workspace;
         }
-        if let Some(ollama) = ollama {
-            if let Some(provider) = self
+        if let Some(ollama) = ollama
+            && let Some(provider) = self
                 .providers
                 .iter_mut()
                 .find(|provider| provider.id == "ollama")
-            {
-                provider.base_url = ollama;
-            }
+        {
+            provider.base_url = ollama;
         }
     }
 }

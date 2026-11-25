@@ -363,21 +363,21 @@ impl App {
         let Some(storage) = &self.storage else {
             return;
         };
-        if let Ok(events) = storage.recent_events(&self.pipeline_id) {
-            if !events.is_empty() {
-                self.events.push(format!(
-                    "14:32:06  storage  restored {} persisted events",
-                    events.len()
-                ));
-            }
+        if let Ok(events) = storage.recent_events(&self.pipeline_id)
+            && !events.is_empty()
+        {
+            self.events.push(format!(
+                "14:32:06  storage  restored {} persisted events",
+                events.len()
+            ));
         }
-        if let Ok(errors) = storage.count_errors(&self.pipeline_id) {
-            if errors > 0 {
-                self.errors.push(format!(
-                    "storage restored {} persisted error records",
-                    errors
-                ));
-            }
+        if let Ok(errors) = storage.count_errors(&self.pipeline_id)
+            && errors > 0
+        {
+            self.errors.push(format!(
+                "storage restored {} persisted error records",
+                errors
+            ));
         }
     }
 
@@ -1251,22 +1251,21 @@ impl App {
                 agent.tokens += 7;
                 agent.duration_secs += 1;
             }
-            if self.elapsed % 2 == 0 {
-                if let Some(agent) = self
+            if self.elapsed.is_multiple_of(2)
+                && let Some(agent) = self
                     .agents
                     .iter()
                     .find(|agent| agent.status == Status::Running)
-                {
-                    self.events.push(format!(
-                        "14:{:02}:{:02}  {}  heartbeat  tool={} tokens=+7",
-                        32 + (self.elapsed / 60),
-                        self.elapsed % 60,
-                        agent.name,
-                        agent.tool
-                    ));
-                    if self.events.len() > 40 {
-                        self.events.remove(0);
-                    }
+            {
+                self.events.push(format!(
+                    "14:{:02}:{:02}  {}  heartbeat  tool={} tokens=+7",
+                    32 + (self.elapsed / 60),
+                    self.elapsed % 60,
+                    agent.name,
+                    agent.tool
+                ));
+                if self.events.len() > 40 {
+                    self.events.remove(0);
                 }
             }
             self.advance_pipeline();
@@ -1618,7 +1617,7 @@ impl App {
     fn handle_key_event(&mut self, key: KeyEvent) -> bool {
         match key.kind {
             KeyEventKind::Press => {
-                self.pressed_keys.insert(key.code.clone());
+                self.pressed_keys.insert(key.code);
                 self.handle_key(key)
             }
             KeyEventKind::Repeat => self.handle_key(key),
